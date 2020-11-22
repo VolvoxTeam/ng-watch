@@ -1,0 +1,9 @@
+{
+  "name": "ng-watch",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "chokidar": "^3.4.3",
+    "ncp": "^2.0.0"
+  }
+}
