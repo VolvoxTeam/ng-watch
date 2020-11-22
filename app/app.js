@@ -170,8 +170,10 @@ function syncMap(mappings, watch) {
 
         volvoxMappings.copy(mappings[+result - 1], true, () => {
             if (watch) {
-                volvoxMappings.watch(mappings[+result - 1])
-                question.close();
+                volvoxMappings.watch(mappings[+result - 1]);
+                question.onClose(() => {
+                    volvoxMappings.unwatch();
+                })
             }
         });
     });

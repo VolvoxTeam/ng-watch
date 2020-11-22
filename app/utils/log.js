@@ -37,11 +37,15 @@ class VolvoxLog {
      * @param {string} message
      */
     error(message) {
-        console.log(Colors.FgRed, `[ERROR] ${ message }`, Colors.FgWhite);
+        console.log(Colors.FgRed, message, Colors.FgWhite);
     }
 
-    warning() {
+    process(message) {
+        console.log(Colors.FgMagenta, message, Colors.FgWhite)
+    }
 
+    warning(message) {
+        console.log(Colors.FgYellow, message, Colors.FgWhite);
     }
 
     /**
@@ -55,7 +59,7 @@ class VolvoxLog {
     }
 
     success(message) {
-        console.log(Colors.FgGreen, `[SUCCESS] ${ message }`, Colors.FgWhite)
+        console.log(Colors.FgGreen, message, Colors.FgWhite)
     }
 
     /**

@@ -10,6 +10,7 @@ class VolvoxMapping {
         this.path = path;
         this.copying = false;
         this.copyAfterFinish = false;
+        this.watcher = null;
     }
 
     init() {
@@ -61,26 +62,26 @@ class VolvoxMapping {
     }
 
     watch(mapping) {
-        const watcher = chokidar.watch(mapping.source, { ignored: /^\./, persistent: true });
+        this.watcher = chokidar.watch(mapping.source, { ignored: /^\./, persistent: true });
         log.info('Watching for file changes...');
 
-        watcher
+        this.watcher
             .on('add', () => {
-                log.info('File has been added');
                 this.copy(mapping);
             })
             .on('change', () => {
-                log.info('File has been changed');
                 this.copy(mapping);
             })
             .on('unlink', () => {
-                log.info('File has been removed');
                 this.copy(mapping);
             })
             .on('error', (error) => {
-                log.info('Got an error:');
                 log.error(error.message);
             });
+    }
+
+    unwatch() {
+        this.watcher.close();
     }
 
     copy(mapping, clear = false, onCopied) {
@@ -89,17 +90,14 @@ class VolvoxMapping {
         }
 
         if (this.copying) {
-            log.info('Waiting for copy to finish...');
             this.copyAfterFinish = true;
             return;
         }
 
         ncp.limit = 0;
-        log.info(`Start copy`);
+        log.process(`Copying...`);
         this.copying = true;
         ncp(mapping.source, mapping.target, (err) => {
-            this.copying = false;
-
             if (err) {
                 log.error(err);
             }
@@ -110,9 +108,10 @@ class VolvoxMapping {
 
             if (this.copyAfterFinish) {
                 this.copyAfterFinish = false;
-                this.copy(mapping, false);
+                this.copy(mapping);
             }
-            log.success('done.');
+            this.copying = false;
+            log.success('Done.');
         });
     }
 

@@ -15,6 +15,10 @@ class VolvoxQuestion {
         rl.question(question, callback);
     }
 
+    onClose(callback) {
+        rl.on('close', callback)
+    }
+
     close() {
         rl.close();
     }
