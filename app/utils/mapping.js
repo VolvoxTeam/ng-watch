@@ -119,7 +119,7 @@ class VolvoxMapping {
     }
 
     save() {
-        fs.writeFile(this.path, JSON.stringify(this.data));
+        fs.writeFile(this.path, JSON.stringify(this.data), () => {});
     }
 
     set data(value) {

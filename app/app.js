@@ -7,9 +7,15 @@ const volvoxMappings = new VolvoxMapping(`${ __dirname }/mappings/mappings.json`
 const express = require('express');
 const app = express();
 
+app.use(express.static(`${__dirname}/dist`));
+
 app.use(express.json());
 
 volvoxMappings.init();
+
+app.get('/', (req, res) => {
+    res.sendFile(`${__dirname}/dist`);
+});
 
 /**
  * Get all mappings

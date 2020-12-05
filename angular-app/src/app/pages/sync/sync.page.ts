@@ -7,7 +7,6 @@ import { SharedDataFacade } from '../../facades/shared-data.facade';
 import { SyncFacade } from '../../facades/sync.facade';
 import { IMapping } from '../../models/mapping.model';
 import { ISyncState } from '../../models/states/sync-state.model';
-import Timeout = NodeJS.Timeout;
 
 @Component({
     selector: 'ng-watch-sync',
@@ -22,7 +21,7 @@ export class SyncPage extends BaseComponent implements OnInit {
 
     public formGroup: FormGroup;
 
-    private interval: Timeout;
+    private interval: any;
 
     constructor(
         private readonly mySharedDataFacade: SharedDataFacade,
@@ -88,7 +87,7 @@ export class SyncPage extends BaseComponent implements OnInit {
     public stopWatching(): void {
         clearInterval(this.interval);
         this.mySyncFacade.updateWatchingStatus(false);
-        this.myLoggerService.logSuccess(null, 'Stopped watching for file changes');
+        this.myLoggerService.logSuccess(null, 'Stopped watching for file changes', true);
     }
 
     private filterMappings(filter: string): IMapping[] {
