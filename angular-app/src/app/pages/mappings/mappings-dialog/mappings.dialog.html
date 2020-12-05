@@ -1,0 +1,26 @@
+<ng-container *ngIf="mappingsState$ | async as state">
+    <h1 class="active" mat-dialog-title>{{ dialogHeader | translate }}</h1>
+    <div mat-dialog-content>
+        <form [formGroup]="formGroup">
+            <mat-form-field appearance="fill">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" autocomplete="off">
+                <mat-error>Name is required</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+                <mat-label>Source</mat-label>
+                <input matInput formControlName="source" autocomplete="off">
+                <mat-error>Source is required</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+                <mat-label>Target</mat-label>
+                <input matInput formControlName="target" autocomplete="off">
+                <mat-error>Target is required</mat-error>
+            </mat-form-field>
+        </form>
+    </div>
+    <div mat-dialog-actions>
+        <button mat-stroked-button mat-dialog-close style="margin-right: 10px;">CANCEL</button>
+        <volvox-loading-button label="SAVE" (click)="save()" [loading]="state.saving" buttonType="flat" color="primary"></volvox-loading-button>
+    </div>
+</ng-container>

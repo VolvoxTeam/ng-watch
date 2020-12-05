@@ -1,14 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0989E556-FA3B-4FF8-B1D6-C8145526BD6A}"
-ProjectSection(SolutionItems) = preProject
-	.gitignore = .gitignore
-	LICENSE = LICENSE
-	package.json = package.json
-	package-lock.json = package-lock.json
-	README.md = README.md
-EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

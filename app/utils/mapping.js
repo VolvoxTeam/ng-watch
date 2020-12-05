@@ -11,54 +11,57 @@ class VolvoxMapping {
         this.copying = false;
         this.copyAfterFinish = false;
         this.watcher = null;
+        this.lastSynced = null;
     }
 
     init() {
-        this.data = {
-            $schema: './schema.json',
-            mappings: [
-                {
-                    source: null,
-                    target: null,
-                    name: null,
-                },
-            ],
-        };
-        this.data.mappings.splice(0, 1);
-        this.read();
-    }
-
-    add(mapping) {
-        const mapData = { ...this.data };
-        mapData.mappings.push(mapping);
-        this.data = mapData;
-        this.save();
-    }
-
-    update(index, mapping) {
-        const mapData = { ...this.data };
-        mapData.mappings[index] = mapping;
-        this.data = mapData;
-        this.save();
-    }
-
-    delete(index) {
-        const mapData = { ...this.data };
-        mapData.mappings.splice(index, 1);
-        this.data = mapData;
-        this.save();
-    }
-
-    read() {
+        this.data = [];
         fs.readFile(this.path, (err, data) => {
             if (err) {
                 // User has no mappings
                 this.save();
             }
 
-            // User has mappings
-            this.data = JSON.parse(data.toString());
+            this.data = JSON.parse(data.toString().trim());
         });
+    }
+
+    add(mapping) {
+        if (!mapping) {
+            log.error('No mapping given');
+            return;
+        }
+
+        const mapData = [ ...this.data ];
+        mapping.id = mapData.length + 1;
+        mapData.push(mapping);
+        this.data = mapData;
+        this.save();
+    }
+
+    update(mapping) {
+        if (!mapping) {
+            log.error('No mapping given');
+            return;
+        }
+
+        const mapData = [ ...this.data ];
+        const index = mapData.findIndex((val) => val.id === mapping.id);
+        if (index !== -1) {
+            mapData[index] = mapping;
+            this.data = mapData;
+            this.save();
+        } else {
+            log.error('No mapping found');
+        }
+    }
+
+    delete(mappingId) {
+        const mapData = [ ...this.data ];
+        const index = mapData.findIndex((val) => val.id === mappingId);
+        mapData.splice(index, 1);
+        this.data = mapData;
+        this.save();
     }
 
     watch(mapping) {
@@ -67,13 +70,13 @@ class VolvoxMapping {
 
         this.watcher
             .on('add', () => {
-                this.copy(mapping);
+                // this.copy(mapping);
             })
             .on('change', () => {
-                this.copy(mapping);
+                // this.copy(mapping);
             })
             .on('unlink', () => {
-                this.copy(mapping);
+                // this.copy(mapping);
             })
             .on('error', (error) => {
                 log.error(error.message);
@@ -84,10 +87,8 @@ class VolvoxMapping {
         this.watcher.close();
     }
 
-    copy(mapping, clear = false, onCopied) {
-        if (clear) {
-            log.clear();
-        }
+    copy(mapping, onCopied) {
+        // TODO: Check for __ivy_ngcc__
 
         if (this.copying) {
             this.copyAfterFinish = true;
@@ -102,22 +103,23 @@ class VolvoxMapping {
                 log.error(err);
             }
 
-            if (onCopied) {
-                onCopied();
-            }
-
             if (this.copyAfterFinish) {
                 this.copyAfterFinish = false;
                 this.copy(mapping);
             }
-            this.copying = false;
+
             log.success('Done.');
+            this.lastSynced = new Date();
+
+            if (onCopied) {
+                onCopied(err);
+            }
+            this.copying = false;
         });
     }
 
     save() {
-        fs.writeFile(this.path, JSON.stringify(this.data), () => {
-        });
+        fs.writeFile(this.path, JSON.stringify(this.data), () => {});
     }
 
     set data(value) {
