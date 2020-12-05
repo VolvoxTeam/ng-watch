@@ -3,6 +3,8 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { TranslateService } from '@ngx-translate/core';
 import { I18nSupported, LoggerComponent, LoggerService, VolvoxTranslateService } from '@volvox-ng/core';
 import { environment } from '../environments/environment';
+import { ISharedDataState } from './models/states/shared-data-state.model';
+import { SharedDataFacade } from './facades/shared-data.facade';
 
 @Component({
     selector: 'ng-watch-root',
@@ -28,11 +30,13 @@ export class AppComponent implements OnInit {
         private readonly myTranslateService: TranslateService,
         private readonly myVolvoxTranslateService: VolvoxTranslateService,
         private readonly myLoggerService: LoggerService,
+        private readonly mySharedDataFacade: SharedDataFacade,
     ) {
     }
 
     public ngOnInit(): void {
         this.initI18n();
+        this.loadMappings();
     }
 
     /**
@@ -42,6 +46,18 @@ export class AppComponent implements OnInit {
         this.sideNav.toggle().then();
     }
 
+    /**
+     * Loads all mappings
+     * @private
+     */
+    private loadMappings(): void {
+        this.mySharedDataFacade.loadMappings().toPromise().then();
+    }
+
+    /**
+     * Initializes translation
+     * @private
+     */
     private initI18n(): void {
         this.myTranslateService.setDefaultLang('en-US');
         this.myVolvoxTranslateService.merge(I18nSupported.enUS).then((): void => {

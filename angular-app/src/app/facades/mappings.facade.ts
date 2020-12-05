@@ -8,7 +8,6 @@ import { IMappingsState } from '../models/states/mappings-state.model';
 let _state: IMappingsState = {
     loading: false,
     saving: false,
-    mappings: [],
 };
 
 @Injectable({
@@ -26,14 +25,6 @@ export class MappingsFacade {
 
     public subState(): Observable<IMappingsState> {
         return this.store$.asObservable();
-    }
-
-    public loadMappings(): Observable<IMapping[]> {
-        this.updateState({ ..._state, loading: true, mappings: [] });
-        return this.myApiService.get<IMapping[]>(`api/mappings`)
-            .pipe(
-                tap((mappings: IMapping[]): void => this.updateState({ ..._state, loading: false, mappings }))
-            );
     }
 
     public addMapping(mapping: IMapping): Observable<IMapping> {

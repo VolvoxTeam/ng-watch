@@ -1,0 +1,54 @@
+<ng-container *ngIf="syncState$ | async as state">
+    <div class="page-header">
+        <div class="content">
+            <h2 class="content-left">Sync</h2>
+        </div>
+        <hr>
+    </div>
+    <div class="last-synced">
+        Last synced: 20. November, 2020
+    </div>
+    <form [formGroup]="formGroup" class="form">
+        <div>
+            <mat-form-field appearance="fill">
+                <mat-label>Choose Mapping</mat-label>
+                <input matInput formControlName="mapping" autocomplete="off" [matAutocomplete]="autocomplete">
+                <mat-autocomplete #autocomplete [displayWith]="mappingDisplay"
+                                  (optionSelected)="onMappingChange($event.option.value)">
+                    <mat-option *ngFor="let option of filteredMappings$ | async" [value]="option">
+                        {{ option.name }}
+                    </mat-option>
+                </mat-autocomplete>
+                <mat-error>Mapping is required</mat-error>
+            </mat-form-field>
+            <mat-checkbox color="primary" formControlName="watch">Watch for file changes</mat-checkbox>
+        </div>
+
+        <div>
+            <button mat-raised-button color="primary" class="actions" [disabled]="state.loading" (click)="sync()">
+                START
+            </button>
+        </div>
+    </form>
+
+    <mat-card *ngIf="state.activeMapping as activeMapping">
+        <mat-progress-bar *ngIf="state.loading" mode="indeterminate" color="accent"></mat-progress-bar>
+
+        <div class="caption">
+            {{ activeMapping.name }}
+        </div>
+
+        <div class="mapping-details">
+            <div class="source">
+                {{ activeMapping.source }}
+            </div>
+            <div class="spacer">
+                <mat-icon>east</mat-icon>
+            </div>
+            <div class="target">
+                {{ activeMapping.target }}
+            </div>
+        </div>
+
+    </mat-card>
+</ng-container>
