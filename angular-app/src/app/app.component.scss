@@ -1,0 +1,21 @@
+mat-sidenav-container {
+  height: calc(100% - 64px);
+
+  mat-sidenav-content {
+    background: #eeeeee;
+    padding: 20px;
+  }
+}
+
+mat-list-item {
+  min-width: 200px;
+
+  a {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    color: #222;
+    margin: -16px;
+    padding: 16px;
+  }
+}

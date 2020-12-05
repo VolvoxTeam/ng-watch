@@ -14,37 +14,44 @@ class VolvoxMapping {
     }
 
     init() {
-        this.data = {
-            $schema: './schema.json',
-            mappings: [
-                {
-                    source: null,
-                    target: null,
-                    name: null,
-                },
-            ],
-        };
-        this.data.mappings.splice(0, 1);
+        this.data = [];
         this.read();
     }
 
     add(mapping) {
-        const mapData = { ...this.data };
-        mapData.mappings.push(mapping);
+        if (!mapping) {
+            log.error('No mapping given');
+            return;
+        }
+
+        const mapData = [ ...this.data ];
+        mapping.id = mapData.length + 1;
+        mapData.push(mapping);
         this.data = mapData;
         this.save();
     }
 
-    update(index, mapping) {
-        const mapData = { ...this.data };
-        mapData.mappings[index] = mapping;
-        this.data = mapData;
-        this.save();
+    update(mapping) {
+        if (!mapping) {
+            log.error('No mapping given');
+            return;
+        }
+
+        const mapData = [ ...this.data ];
+        const index = mapData.findIndex((val) => val.id === mapping.id);
+        if (index !== -1) {
+            mapData[index] = mapping;
+            this.data = mapData;
+            this.save();
+        } else {
+            log.error('No mapping found');
+        }
     }
 
-    delete(index) {
-        const mapData = { ...this.data };
-        mapData.mappings.splice(index, 1);
+    delete(mappingId) {
+        const mapData = [ ...this.data ];
+        const index = mapData.findIndex((val) => val.id === mappingId);
+        mapData.splice(index, 1);
         this.data = mapData;
         this.save();
     }
@@ -56,8 +63,7 @@ class VolvoxMapping {
                 this.save();
             }
 
-            // User has mappings
-            this.data = JSON.parse(data.toString());
+            this.data = JSON.parse(data.toString().trim());
         });
     }
 
@@ -89,6 +95,8 @@ class VolvoxMapping {
             log.clear();
         }
 
+        // TODO: Check for __ivy_ngcc__
+
         if (this.copying) {
             this.copyAfterFinish = true;
             return;
@@ -102,16 +110,17 @@ class VolvoxMapping {
                 log.error(err);
             }
 
-            if (onCopied) {
-                onCopied();
-            }
-
             if (this.copyAfterFinish) {
                 this.copyAfterFinish = false;
                 this.copy(mapping);
             }
-            this.copying = false;
+
             log.success('Done.');
+
+            if (onCopied) {
+                onCopied();
+            }
+            this.copying = false;
         });
     }
 
