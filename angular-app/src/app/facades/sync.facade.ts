@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '@volvox-ng/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { IMapping } from '../models/mapping.model';
 import { ISyncState } from '../models/states/sync-state.model';
 
@@ -9,6 +9,7 @@ let _state: ISyncState = {
     activeMapping: null,
     loading: false,
     lastSynced: null,
+    watching: false,
 };
 
 @Injectable({
@@ -32,12 +33,27 @@ export class SyncFacade {
         return this.store$.value;
     }
 
-    public copy(mapping: IMapping, watch: boolean): Observable<any> {
-        this.updateState({ ..._state, loading: true });
-        return this.myApiService.post<{ mapping: IMapping, watch: boolean }, void>('api/copy', { mapping, watch })
+    public getLastSynced(): Observable<Date> {
+        return this.myApiService.get<string>('/api/copy/last-synced')
             .pipe(
-                tap((): void => this.updateState({ ..._state, loading: false })),
-                catchError((err: any): any => {
+                map((lastSynced: string): Date => {
+                    this.updateState({ ..._state, lastSynced: new Date(lastSynced) });
+                    return new Date(lastSynced);
+                }),
+            );
+    }
+
+    public copy(mapping: IMapping, watch: boolean): Observable<string> {
+        this.updateState({ ..._state, loading: true });
+        return this.myApiService.post<{ mapping: IMapping, watch: boolean }, string>('api/copy', { mapping, watch })
+            .pipe(
+                tap((lastSynced: string): void => this.updateState({
+                    ..._state,
+                    lastSynced: new Date(lastSynced),
+                    loading: false,
+                    watching: watch,
+                })),
+                catchError((err: any): string => {
                     this.updateState({ ..._state, loading: false });
                     throw err;
                 }),
@@ -48,8 +64,8 @@ export class SyncFacade {
         this.updateState({ ..._state, activeMapping });
     }
 
-    public updateLastSynced(date: Date): void {
-        this.updateState({ ..._state, lastSynced: date });
+    public updateWatchingStatus(watching: boolean): void {
+        this.updateState({ ..._state, watching });
     }
 
     private updateState(state: ISyncState): void {

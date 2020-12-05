@@ -7,6 +7,7 @@ import { SharedDataFacade } from '../../facades/shared-data.facade';
 import { SyncFacade } from '../../facades/sync.facade';
 import { IMapping } from '../../models/mapping.model';
 import { ISyncState } from '../../models/states/sync-state.model';
+import Timeout = NodeJS.Timeout;
 
 @Component({
     selector: 'ng-watch-sync',
@@ -20,6 +21,8 @@ export class SyncPage extends BaseComponent implements OnInit {
     public syncState$: Observable<ISyncState>;
 
     public formGroup: FormGroup;
+
+    private interval: Timeout;
 
     constructor(
         private readonly mySharedDataFacade: SharedDataFacade,
@@ -60,6 +63,10 @@ export class SyncPage extends BaseComponent implements OnInit {
         this.mySyncFacade.updateActiveMapping(mapping);
     }
 
+    public getLastSynced(): void {
+        this.mySyncFacade.getLastSynced().toPromise().then();
+    }
+
     public copy(mapping: IMapping): void {
         const watch: boolean = this.formGroup.get('watch').value;
         this.mySyncFacade.copy(mapping, watch)
@@ -71,11 +78,17 @@ export class SyncPage extends BaseComponent implements OnInit {
             )
             .subscribe((): void => {
                 this.myLoggerService.logSuccess('Copied', 'Source was copied to target', true);
-                this.mySyncFacade.updateLastSynced(new Date());
                 if (watch) {
                     this.myLoggerService.logSuccess(null, 'Watching for file changes...', true);
+                    this.interval = setInterval((): void => this.getLastSynced(), 1000);
                 }
             });
+    }
+
+    public stopWatching(): void {
+        clearInterval(this.interval);
+        this.mySyncFacade.updateWatchingStatus(false);
+        this.myLoggerService.logSuccess(null, 'Stopped watching for file changes');
     }
 
     private filterMappings(filter: string): IMapping[] {

@@ -11,6 +11,7 @@ class VolvoxMapping {
         this.copying = false;
         this.copyAfterFinish = false;
         this.watcher = null;
+        this.lastSynced = null;
     }
 
     init() {
@@ -108,6 +109,7 @@ class VolvoxMapping {
             }
 
             log.success('Done.');
+            this.lastSynced = new Date();
 
             if (onCopied) {
                 onCopied(err);
@@ -117,8 +119,7 @@ class VolvoxMapping {
     }
 
     save() {
-        fs.writeFile(this.path, JSON.stringify(this.data), () => {
-        });
+        fs.writeFile(this.path, JSON.stringify(this.data));
     }
 
     set data(value) {
