@@ -15,7 +15,14 @@ class VolvoxMapping {
 
     init() {
         this.data = [];
-        this.read();
+        fs.readFile(this.path, (err, data) => {
+            if (err) {
+                // User has no mappings
+                this.save();
+            }
+
+            this.data = JSON.parse(data.toString().trim());
+        });
     }
 
     add(mapping) {
@@ -56,30 +63,19 @@ class VolvoxMapping {
         this.save();
     }
 
-    read() {
-        fs.readFile(this.path, (err, data) => {
-            if (err) {
-                // User has no mappings
-                this.save();
-            }
-
-            this.data = JSON.parse(data.toString().trim());
-        });
-    }
-
     watch(mapping) {
         this.watcher = chokidar.watch(mapping.source, { ignored: /^\./, persistent: true });
         log.info('Watching for file changes...');
 
         this.watcher
             .on('add', () => {
-                this.copy(mapping);
+                // this.copy(mapping);
             })
             .on('change', () => {
-                this.copy(mapping);
+                // this.copy(mapping);
             })
             .on('unlink', () => {
-                this.copy(mapping);
+                // this.copy(mapping);
             })
             .on('error', (error) => {
                 log.error(error.message);
@@ -90,11 +86,7 @@ class VolvoxMapping {
         this.watcher.close();
     }
 
-    copy(mapping, clear = false, onCopied) {
-        if (clear) {
-            log.clear();
-        }
-
+    copy(mapping, onCopied) {
         // TODO: Check for __ivy_ngcc__
 
         if (this.copying) {
@@ -118,7 +110,7 @@ class VolvoxMapping {
             log.success('Done.');
 
             if (onCopied) {
-                onCopied();
+                onCopied(err);
             }
             this.copying = false;
         });

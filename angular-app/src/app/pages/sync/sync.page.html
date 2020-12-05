@@ -5,9 +5,6 @@
         </div>
         <hr>
     </div>
-    <div class="last-synced">
-        Last synced: 20. November, 2020
-    </div>
     <form [formGroup]="formGroup" class="form">
         <div>
             <mat-form-field appearance="fill">
@@ -25,30 +22,36 @@
         </div>
 
         <div>
-            <button mat-raised-button color="primary" class="actions" [disabled]="state.loading" (click)="sync()">
-                START
+            <button mat-raised-button color="primary" class="actions"
+                    [disabled]="state.loading || !state.activeMapping || !formGroup.valid"
+                    (click)="copy(state.activeMapping)">
+                START COPY
             </button>
         </div>
     </form>
-
-    <mat-card *ngIf="state.activeMapping as activeMapping">
-        <mat-progress-bar *ngIf="state.loading" mode="indeterminate" color="accent"></mat-progress-bar>
-
-        <div class="caption">
-            {{ activeMapping.name }}
+    <ng-container *ngIf="state.activeMapping as activeMapping">
+        <div class="last-synced" *ngIf="state.lastSynced">
+            Last synced: {{ state.lastSynced | date: 'medium' }}
         </div>
+        <mat-card>
+            <mat-progress-bar *ngIf="state.loading" mode="indeterminate" color="accent"></mat-progress-bar>
 
-        <div class="mapping-details">
-            <div class="source">
-                {{ activeMapping.source }}
+            <div class="caption">
+                {{ activeMapping.name }}
             </div>
-            <div class="spacer">
-                <mat-icon>east</mat-icon>
-            </div>
-            <div class="target">
-                {{ activeMapping.target }}
-            </div>
-        </div>
 
-    </mat-card>
+            <div class="mapping-details">
+                <div class="source">
+                    {{ activeMapping.source }}
+                </div>
+                <div class="spacer">
+                    <mat-icon>east</mat-icon>
+                </div>
+                <div class="target">
+                    {{ activeMapping.target }}
+                </div>
+            </div>
+
+        </mat-card>
+    </ng-container>
 </ng-container>

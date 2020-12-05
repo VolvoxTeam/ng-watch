@@ -22,8 +22,8 @@ app.get('/api/mappings', (req, res) => {
  * Add a new mapping
  */
 app.post('/api/mappings', (req, res) => {
-   volvoxMappings.add(req.body);
-   res.json(req.body);
+    volvoxMappings.add(req.body);
+    res.json(req.body);
 });
 
 /**
@@ -41,6 +41,28 @@ app.delete('/api/mappings/:mappingId', (req, res) => {
     volvoxMappings.delete(req.params.mappingId);
     res.json(req.params.mappingId);
 });
+
+/**
+ * Copies source from mapping to target
+ */
+app.post('/api/copy', (req, res) => {
+    if (!req.body) {
+        log.error('No data given');
+        return;
+    }
+    volvoxMappings.copy(req.body.mapping, (err) => {
+        if (err) {
+            res.statusCode = 400;
+            res.json({ message: 'Directory not found' });
+        } else {
+            if (req.body.watch) {
+                volvoxMappings.watch(req.body.mapping);
+            }
+            res.json();
+        }
+    });
+});
+
 
 app.listen('8080');
 log.info('Backend running on http://localhost:8080/');

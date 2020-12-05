@@ -3,4 +3,5 @@
 export interface ISyncState {
     activeMapping: IMapping;
     loading: boolean;
+    lastSynced: Date,
 }

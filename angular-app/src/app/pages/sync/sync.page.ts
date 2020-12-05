@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { BaseComponent, isNullOrUndefined } from '@volvox-ng/core';
+import { BaseComponent, isNullOrUndefined, LoggerService } from '@volvox-ng/core';
 import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { catchError, map, startWith } from 'rxjs/operators';
 import { SharedDataFacade } from '../../facades/shared-data.facade';
 import { SyncFacade } from '../../facades/sync.facade';
 import { IMapping } from '../../models/mapping.model';
@@ -23,6 +23,7 @@ export class SyncPage extends BaseComponent implements OnInit {
 
     constructor(
         private readonly mySharedDataFacade: SharedDataFacade,
+        private readonly myLoggerService: LoggerService,
         private readonly mySyncFacade: SyncFacade,
     ) {
         super();
@@ -59,8 +60,22 @@ export class SyncPage extends BaseComponent implements OnInit {
         this.mySyncFacade.updateActiveMapping(mapping);
     }
 
-    public sync(): void {
-
+    public copy(mapping: IMapping): void {
+        const watch: boolean = this.formGroup.get('watch').value;
+        this.mySyncFacade.copy(mapping, watch)
+            .pipe(
+                catchError((err: any): any => {
+                    this.myLoggerService.logError('Error', err, true);
+                    throw err;
+                })
+            )
+            .subscribe((): void => {
+                this.myLoggerService.logSuccess('Copied', 'Source was copied to target', true);
+                this.mySyncFacade.updateLastSynced(new Date());
+                if (watch) {
+                    this.myLoggerService.logSuccess(null, 'Watching for file changes...', true);
+                }
+            });
     }
 
     private filterMappings(filter: string): IMapping[] {
